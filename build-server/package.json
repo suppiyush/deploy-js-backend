@@ -1,0 +1,15 @@
+{
+  "name": "build-server",
+  "version": "1.0.0",
+  "main": "script.js",
+  "type": "module",
+  "license": "ISC",
+  "description": "Server which clones given React github repo, builds the project and uploads the built artifacts to S3.",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.952.0",
+    "dotenv": "^17.2.3",
+    "jsonwebtoken": "^9.0.3",
+    "kafkajs": "^2.2.4",
+    "mime-types": "^3.0.2"
+  }
+}

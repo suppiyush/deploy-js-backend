@@ -1,0 +1,39 @@
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:23.8
+    container_name: clickhouse
+    ports:
+      - "8123:8123"
+    environment:
+      CLICKHOUSE_DB: analytics
+      CLICKHOUSE_USER: app
+      CLICKHOUSE_PASSWORD: secret
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./clickhouse/init:/docker-entrypoint-initdb.d
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+
+  s3-reverse-proxy:
+    image: s3-reverse-proxy
+    container_name: s3-reverse-proxy
+    ports:
+      - 8000:8000
+    env_file:
+      - ./s3-reverse-proxy/.env
+
+  api-server:
+    image: api-server
+    depends_on:
+      - clickhouse
+    container_name: api-server
+    ports:
+      - 3000:3000
+    env_file:
+      - ./api-server/.env
+
+volumes:
+  clickhouse_data:
