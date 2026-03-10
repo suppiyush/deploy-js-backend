@@ -5,6 +5,7 @@ import { ApiError } from "../utils/ApiError.js";
 
 import * as projectService from "../services/project.service.js";
 import { projectActionSchema } from "../validators/project/projectAction.validator.js";
+import { getProjectSchema } from "../validators/project/getProject.validator.js";
 
 const createProject = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -100,4 +101,28 @@ const redeploy = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
-export { createProject, checkStatus, deleteProject, redeploy };
+const getProject = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const projectId = req.params.id;
+    const parsedData = getProjectSchema.safeParse({ projectId });
+
+    if (!parsedData.success) throw new ApiError(400, parsedData.error.issues[0].message);
+
+    const result = await projectService.getProject({
+      ...parsedData.data,
+      userId: req.user.userId,
+    });
+
+    return res.status(result.statusCode).json({
+      success: result.success,
+      message: result.message,
+      data: result.data,
+    });
+  } catch (err: any) {
+    return res
+      .status(err.statusCode || 500)
+      .json({ success: err.success || false, message: err.message || "Internal Server Error" });
+  }
+};
+
+export { createProject, checkStatus, deleteProject, redeploy, getProject };

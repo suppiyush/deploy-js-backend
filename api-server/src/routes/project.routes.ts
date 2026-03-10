@@ -8,5 +8,6 @@ router.post("/", authMiddleware, projectController.createProject);
 router.delete("/:id", authMiddleware, projectController.deleteProject);
 router.post("/:id/redeploy", authMiddleware, projectController.redeploy);
 router.get("/:id/status", authMiddleware, projectController.checkStatus);
+router.get("/:id", authMiddleware, projectController.getProject);
 
 export { router as projectRouter };

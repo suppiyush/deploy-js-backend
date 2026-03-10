@@ -10,5 +10,6 @@ router.post("/login", rateLimiters.auth, userController.login);
 router.post("/refresh-token", rateLimiters.auth, userController.refreshAccessToken);
 router.post("/logout", authMiddleware, userController.logout);
 router.get("/projects", rateLimiters.auth, authMiddleware, userController.getProjects);
+router.get("/me", authMiddleware, userController.getMe);
 
 export { router as userRouter };

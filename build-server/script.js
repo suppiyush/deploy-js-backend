@@ -22,6 +22,7 @@ async function init() {
     await logger.log("All files uploaded successfully.");
 
     await updateStatus("DEPLOYED");
+    await logger.log("Deployment status updated to DEPLOYED.");
     process.exit(0);
   } catch (err) {
     await logger.log(err?.stack || err);

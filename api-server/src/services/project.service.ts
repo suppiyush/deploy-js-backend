@@ -236,4 +236,51 @@ const redeploy = async (data: ProjectActionData): Promise<ApiResponse> => {
   });
 };
 
-export { createProject, checkStatus, deleteProject, redeploy };
+const getProject = async (data: ProjectActionData): Promise<ApiResponse> => {
+  const { userId, projectId } = data;
+
+  const project = await prisma.project.findUnique({
+    where: {
+      id: projectId,
+    },
+    select: {
+      userId: true,
+      name: true,
+
+      gitRepoUrl: true,
+      deployedUrl: true,
+
+      deployments: {
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          id: true,
+          status: true,
+          createdAt: true,
+        },
+      },
+    },
+  } as const);
+
+  if (!project) throw new ApiError(404, "Project not found");
+
+  // Checking if the project belongs to same User
+  if (project.userId !== userId) throw new ApiError(403, "Forbidden Request");
+
+  const latestDeployment = project.deployments[0];
+  if (!latestDeployment) throw new ApiError(404, "No deployment found");
+
+  return new ApiResponse(200, "Project retrieved successfully", {
+    project: {
+      name: project.name,
+      gitRepoUrl: project.gitRepoUrl,
+      deployedUrl: project.deployedUrl,
+      deployments: project.deployments,
+      status: latestDeployment.status,
+      createdAt: latestDeployment.createdAt.toISOString(),
+    },
+  });
+};
+
+export { createProject, checkStatus, deleteProject, redeploy, getProject };

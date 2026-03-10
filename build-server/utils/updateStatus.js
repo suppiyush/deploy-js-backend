@@ -23,9 +23,10 @@ export async function updateStatus(status) {
     });
 
     const parsedResponse = await response.json();
+    console.log(`API Response: ${JSON.stringify(parsedResponse)}`);
     if (!response.ok) throw new Error();
 
-    console.log(parsedResponse.data.message);
+    console.log(parsedResponse.message);
   } catch (err) {
     console.error("API-SERVER Request failed, Couldn't update Deployment Status");
   }

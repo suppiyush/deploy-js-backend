@@ -34,11 +34,14 @@ const login = async (data: UserLoginData): Promise<ApiResponse> => {
     where: { email },
     select: {
       id: true,
+      firstName: true,
+      email: true,
+      lastName: true,
       password: true,
     },
   });
 
-  if (!user) throw new ApiError(404, "User not found");
+  if (!user) throw new ApiError(401, "Invalid credentials");
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) throw new ApiError(401, "Invalid credentials");
@@ -50,7 +53,12 @@ const login = async (data: UserLoginData): Promise<ApiResponse> => {
   const { accessToken, refreshToken } = await generateToken(tokenData);
 
   return new ApiResponse(200, "Login successful", {
-    userId: user.id,
+    user: {
+      userId: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+    },
     accessToken,
     refreshToken,
   });
@@ -98,6 +106,8 @@ const getProjects = async (userId: string): Promise<ApiResponse> => {
       id: true,
       name: true,
       deployedUrl: true,
+      createdAt: true,
+      gitRepoUrl: true,
       deployments: {
         orderBy: { createdAt: "desc" },
         take: 1,
@@ -111,7 +121,9 @@ const getProjects = async (userId: string): Promise<ApiResponse> => {
   const projects = rawProjects.map((project) => ({
     id: project.id,
     name: project.name,
+    createdAt: project.createdAt.toISOString(),
     deployedUrl: project.deployedUrl,
+    gitRepoUrl: project.gitRepoUrl,
     status: project.deployments[0].status,
   }));
 
@@ -121,4 +133,20 @@ const getProjects = async (userId: string): Promise<ApiResponse> => {
   });
 };
 
-export { signup, login, refreshAccessToken, logout, getProjects };
+const getMe = async (userId: string): Promise<ApiResponse> => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+    },
+  });
+
+  if (!user) throw new ApiError(404, "User not found");
+
+  return new ApiResponse(200, "User fetched successfully", { user: { userId: user.id, ...user } });
+};
+
+export { signup, login, refreshAccessToken, logout, getProjects, getMe };

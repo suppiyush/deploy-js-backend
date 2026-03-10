@@ -27,7 +27,7 @@ const RATE_LIMIT_TIERS = {
 
   PROJECT: {
     windowMs: 30 * 60 * 1000, // 30 minutes
-    max: 10, // 5 attempts per 30 minutes per IP
+    max: 50, // 5 attempts per 30 minutes per IP
     message: "Too many requests. Please try again in 30 minutes.",
   },
 
